@@ -1,7 +1,7 @@
 import { verifyMessage } from "ethers";
 import { ok, err } from "../../domain/result";
 import type { Result } from "../../domain/result";
-import type { DomainError } from "../../domain/errors";
+import { DomainError, DomainErrorCode as E } from "../../domain/errors";
 import type { Message } from "../../domain/value-objects/Message";
 import type { SignatureHex } from "../../domain/value-objects/SignatureHex";
 import { Address } from "../../domain/value-objects/Address";
@@ -18,7 +18,7 @@ export class EthersSignatureVerifier implements SignatureVerifier {
 
       if (!addr.ok) {
         return err({
-          code: "RECOVERY_FAILED",
+          code: E.RECOVERY_FAILED,
           message: "recovered address is invalid",
         });
       }
@@ -26,7 +26,7 @@ export class EthersSignatureVerifier implements SignatureVerifier {
       return ok(addr.value);
     } catch {
       return err({
-        code: "RECOVERY_FAILED",
+        code: E.RECOVERY_FAILED,
         message: "failed to recover signer from signature",
       });
     }

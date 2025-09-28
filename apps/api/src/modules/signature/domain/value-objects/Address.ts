@@ -1,5 +1,5 @@
 import { Result, ok, err } from "../result";
-import type { DomainError } from "../errors";
+import { DomainError, DomainErrorCode as E } from "../errors";
 
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 
@@ -9,7 +9,7 @@ export class Address {
   static create(input: string): Result<DomainError, Address> {
     if (typeof input !== "string" || !ADDRESS_RE.test(input)) {
       return err({
-        code: "ADDRESS_INVALID",
+        code: E.ADDRESS_INVALID,
         message: "address must be 0x + 40 hex",
       });
     }

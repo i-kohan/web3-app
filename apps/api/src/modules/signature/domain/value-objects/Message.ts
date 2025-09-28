@@ -1,5 +1,5 @@
 import { Result, ok, err } from "../result";
-import type { DomainError } from "../errors";
+import { DomainErrorCode as E } from "../errors";
 
 export class Message {
   private constructor(private readonly _value: string) {}
@@ -7,23 +7,22 @@ export class Message {
   static create(
     input: string,
     opts?: { maxLength?: number }
-  ): Result<DomainError, Message> {
+  ): Result<{ code: (typeof E)[keyof typeof E] }, Message> {
     const max = opts?.maxLength ?? 10_000;
 
     if (typeof input !== "string")
-      return err({ code: "MESSAGE_EMPTY", message: "message must be string" });
+      return err({ code: E.MESSAGE_EMPTY, message: "message must be string" });
 
-    const value = input.trim();
-    if (!value)
-      return err({ code: "MESSAGE_EMPTY", message: "message is empty" });
+    if (input.trim().length === 0)
+      return err({ code: E.MESSAGE_EMPTY, message: "message is empty" });
 
-    if (value.length > max)
+    if (input.length > max)
       return err({
-        code: "MESSAGE_TOO_LONG",
+        code: E.MESSAGE_TOO_LONG,
         message: `message length > ${max}`,
       });
 
-    return ok(new Message(value));
+    return ok(new Message(input));
   }
 
   get value(): string {
