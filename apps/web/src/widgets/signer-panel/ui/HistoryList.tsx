@@ -11,10 +11,25 @@ import {
 } from "@/shared/ui/tooltip";
 import { Copy, Trash2 } from "lucide-react";
 import { shortenHex, formatTs } from "@/shared/lib/format";
-import { useHistory } from "@/entities/history/model";
+import { HistoryListSkeleton } from "./HistoryListSkeleton";
+import type { HistoryItem } from "@/entities/history/types";
 
-export function HistoryList() {
-  const [items, { clear, remove }] = useHistory();
+interface HistoryListProps {
+  items: HistoryItem[];
+  onClear: () => void;
+  onRemove: (id: number) => void;
+  isLoading: boolean;
+}
+
+export function HistoryList({
+  items,
+  onClear,
+  onRemove,
+  isLoading,
+}: HistoryListProps) {
+  if (isLoading) {
+    return <HistoryListSkeleton />;
+  }
 
   if (!items.length) {
     return (
@@ -33,7 +48,7 @@ export function HistoryList() {
     <Card>
       <CardHeader className="flex items-center justify-between gap-2">
         <CardTitle>History</CardTitle>
-        <Button variant="outline" size="sm" onClick={clear}>
+        <Button variant="outline" size="sm" onClick={onClear}>
           <Trash2 className="mr-2 h-4 w-4" /> Clear
         </Button>
       </CardHeader>
@@ -102,7 +117,7 @@ export function HistoryList() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => remove(it.id)}
+                      onClick={() => onRemove(it.id)}
                       aria-label="Remove"
                     >
                       <Trash2 className="h-4 w-4" />
