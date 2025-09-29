@@ -1,12 +1,10 @@
-export function shortenHex(addr: string, prefix = 2, suffix = 4): string {
-  return addr.slice(0, prefix) + "..." + addr.slice(-suffix);
-}
+export const shortenHex = (v: string, left = 6, right = 4) =>
+  v && v.startsWith("0x") && v.length > left + right + 2
+    ? `${v.slice(0, 2 + left)}…${v.slice(-right)}`
+    : v;
 
-export function formatTs(ms: number): string {
-  return new Date(ms).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-  });
-}
+export const formatTs = (ts: number) =>
+  new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(ts));

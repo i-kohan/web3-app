@@ -1,13 +1,26 @@
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import {
+  MFAAction,
+  useDynamicContext,
+  useIsMfaRequiredForAction,
+  usePromptMfaAuth,
+} from "@dynamic-labs/sdk-react-core";
 
 export function useSignMessage() {
   const { primaryWallet } = useDynamicContext();
+  const isMfaRequired = useIsMfaRequiredForAction();
+  const promptMfaAuth = usePromptMfaAuth();
 
   return async function signMessage(message: string): Promise<string> {
     const err = validateMessage(message);
     if (err) throw new Error(err);
 
     if (!primaryWallet) throw new Error("Wallet not connected");
+
+    const needed = await isMfaRequired({ mfaAction: MFAAction.WalletWaasSign });
+
+    if (needed) {
+      await promptMfaAuth({ createMfaToken: true });
+    }
 
     const sig = await primaryWallet.signMessage(message);
 

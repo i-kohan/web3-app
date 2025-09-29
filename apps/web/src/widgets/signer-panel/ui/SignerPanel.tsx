@@ -1,43 +1,73 @@
-import { useCallback, useState } from "react";
-import { SignForm } from "@/features/sign-message/ui/SignForm";
-import { VerifyPanel } from "@/features/verify-signature/ui/VerifyPanel";
+import { useState } from "react";
+import { useWallet } from "@/entities/wallet/model";
+import { useSignMessage } from "@/features/sign-message/model";
 import { verify } from "@/features/verify-signature/model";
+import { VerifyPanel } from "@/features/verify-signature/ui/VerifyPanel";
 import type { SignatureResult } from "@/entities/signature/types";
-import { useHistory } from "@/entities/history/model";
+import { addToHistory } from "@/entities/history/model";
 import { HistoryList } from "./HistoryList";
+import { HistoryListSkeleton } from "./HistoryListSkeleton";
+import { SignForm } from "@/features/sign-message/ui/SignForm";
+import { toast } from "sonner";
+import { ErrorBoundary } from "@/shared/ui/error-boundary";
+import { SuspenseBoundary } from "@/shared/ui/suspense-boundary";
 
 export function SignerPanel() {
-  const [history, { add, clear, remove }] = useHistory();
-
+  const { isConnected } = useWallet();
+  const signMessage = useSignMessage();
   const [result, setResult] = useState<SignatureResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSigned = useCallback(
-    async (message: string, signature: string) => {
-      setError(null);
-      setLoading(true);
-      try {
-        const res = await verify(message, signature);
-        setResult(res);
-        add(message, signature, res);
-      } catch (e) {
-        setResult(null);
-        setError(e instanceof Error ? e.message : "Unexpected error");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [add]
-  );
+  async function handleSubmit(message: string) {
+    setLoading(true);
+    setResult(null);
+
+    try {
+      if (!isConnected) throw new Error("Connect your wallet first");
+
+      toast.info("Signing message...");
+      const signature = await signMessage(message);
+
+      toast.info("Verifying signature...");
+      const res = await verify(message, signature);
+
+      setResult(res);
+      addToHistory(message, signature, res);
+      toast.success("Verified", {
+        description: res.isValid
+          ? "Signature is valid"
+          : "Signature is invalid",
+      });
+    } catch (e) {
+      toast.error("Error", {
+        description: e instanceof Error ? e.message : "Unexpected error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="space-y-4">
-      <SignForm onSigned={handleSigned} />
-      {loading && <p>Verifying…</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      <VerifyPanel result={result} />
-      <HistoryList items={history} onClear={clear} onRemove={remove} />
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="space-y-4">
+        <ErrorBoundary>
+          <SignForm
+            onSubmit={handleSubmit}
+            disabled={loading || !isConnected}
+            logged={isConnected}
+          />
+        </ErrorBoundary>
+
+        <ErrorBoundary>
+          <VerifyPanel result={result} />
+        </ErrorBoundary>
+      </div>
+
+      <div className="space-y-4">
+        <SuspenseBoundary fallback={<HistoryListSkeleton />}>
+          <HistoryList />
+        </SuspenseBoundary>
+      </div>
     </div>
   );
 }

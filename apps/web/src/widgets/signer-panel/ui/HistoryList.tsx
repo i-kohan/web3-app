@@ -11,15 +11,11 @@ import {
 } from "@/shared/ui/tooltip";
 import { Copy, Trash2 } from "lucide-react";
 import { shortenHex, formatTs } from "@/shared/lib/format";
-import type { HistoryItem } from "@/entities/history/types";
+import { useHistory } from "@/entities/history/model";
 
-type Props = {
-  items: HistoryItem[];
-  onClear: () => void;
-  onRemove: (id: number) => void;
-};
+export function HistoryList() {
+  const [items, { clear, remove }] = useHistory();
 
-export function HistoryList({ items, onClear, onRemove }: Props) {
   if (!items.length) {
     return (
       <Card>
@@ -35,20 +31,22 @@ export function HistoryList({ items, onClear, onRemove }: Props) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex items-center justify-between gap-2">
         <CardTitle>History</CardTitle>
-        <Button variant="outline" size="sm" onClick={onClear}>
+        <Button variant="outline" size="sm" onClick={clear}>
           <Trash2 className="mr-2 h-4 w-4" /> Clear
         </Button>
       </CardHeader>
+
       <Separator />
+
       <CardContent className="p-0">
-        <ScrollArea className="max-h-80">
+        <ScrollArea className="h-[480px]">
           <ul className="divide-y">
             {items.map((it) => (
               <li key={it.id} className="p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={it.result.isValid ? "default" : "secondary"}
@@ -59,23 +57,29 @@ export function HistoryList({ items, onClear, onRemove }: Props) {
                         {formatTs(it.ts)}
                       </span>
                     </div>
+
                     <div className="text-sm truncate">
                       <span className="font-medium">Signer: </span>
-                      <span className="font-mono">
+                      <span className="font-mono break-all">
                         {it.result.signer ? shortenHex(it.result.signer) : "—"}
                       </span>
                     </div>
-                    <div className="text-sm truncate">
+
+                    <div className="text-sm">
                       <span className="font-medium">Message: </span>
-                      <span className="font-mono">{it.message}</span>
+                      <span className="font-mono break-words line-clamp-1">
+                        {it.message}
+                      </span>
                     </div>
-                    <div className="text-sm truncate">
+
+                    <div className="text-sm">
                       <span className="font-medium">Signature: </span>
-                      <span className="font-mono">
+                      <span className="font-mono break-all line-clamp-1">
                         {shortenHex(it.signature, 8, 6)}
                       </span>
                     </div>
                   </div>
+
                   <div className="flex shrink-0 items-center gap-2">
                     <TooltipProvider>
                       <Tooltip>
@@ -94,10 +98,11 @@ export function HistoryList({ items, onClear, onRemove }: Props) {
                         <TooltipContent>Copy signature</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onRemove(it.id)}
+                      onClick={() => remove(it.id)}
                       aria-label="Remove"
                     >
                       <Trash2 className="h-4 w-4" />

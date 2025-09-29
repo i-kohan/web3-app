@@ -5,7 +5,6 @@ import type { PropsWithChildren } from "react";
 import { env } from "@/shared/config/env";
 
 export function DynamicProvider({ children }: PropsWithChildren) {
-  console.log("env.DYNAMIC_ENV_ID", env.DYNAMIC_ENV_ID);
   return (
     <DynamicContextProvider
       settings={{
