@@ -1,4 +1,4 @@
-import { use, useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getJSON, setJSON } from "@/shared/lib/storage";
 import type { HistoryItem } from "./types";
 import type { SignatureResult } from "../signature/types";
@@ -35,16 +35,18 @@ function dedup(items: HistoryItem[]): HistoryItem[] {
   return out;
 }
 
-const initialHistoryPromise = new Promise<HistoryItem[]>((resolve) => {
-  setTimeout(() => {
-    resolve(hydrate());
-  }, 1000);
-});
-
 export function useHistory() {
-  const initialData = use(initialHistoryPromise);
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [items, setItems] = useState<HistoryItem[]>(initialData);
+  // Загружаем данные при монтировании
+  useEffect(() => {
+    setTimeout(() => {
+      const initialData = hydrate();
+      setItems(initialData);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   const add = useCallback(
     (message: string, signature: string, result: SignatureResult) => {
@@ -75,16 +77,5 @@ export function useHistory() {
 
   const actions = useMemo(() => ({ add, clear, remove }), [add, clear, remove]);
 
-  return [items, actions] as const;
-}
-
-export function addToHistory(
-  message: string,
-  signature: string,
-  result: SignatureResult
-) {
-  const currentItems = getJSON<HistoryItem[]>(STORAGE_KEY, []);
-  const newItem = makeItem(message, signature, result, currentItems.length + 1);
-  const next = dedup([newItem, ...currentItems]).slice(0, MAX_ITEMS);
-  persist(next);
+  return [items, actions, isLoading] as const;
 }
