@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
+import { useSignMessage } from "../model";
 
 type Props = { onSigned: (message: string, signature: string) => void };
 
 export function SignForm({ onSigned }: Props) {
   const [message, setMessage] = useState("");
+  const signMessage = useSignMessage();
 
   async function handleSign() {
-    const signature = "0xFAKE";
+    const signature = await signMessage(message);
     onSigned(message, signature);
   }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { SignForm } from "@/features/sign-message/ui/SignForm";
 import { VerifyPanel } from "@/features/verify-signature/ui/VerifyPanel";
 import { verify } from "@/features/verify-signature/model";
@@ -9,19 +9,22 @@ export function SignerPanel() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSigned(message: string, signature: string) {
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await verify(message, signature);
-      setResult(res);
-    } catch (e) {
-      setResult(null);
-      setError(e instanceof Error ? e.message : "Unexpected error");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const handleSigned = useCallback(
+    async (message: string, signature: string) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const res = await verify(message, signature);
+        setResult(res);
+      } catch (e) {
+        setResult(null);
+        setError(e instanceof Error ? e.message : "Unexpected error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return (
     <div className="space-y-4">
