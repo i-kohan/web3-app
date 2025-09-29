@@ -14,7 +14,7 @@ export class Address {
       });
     }
 
-    const normalized = `0x${input.slice(2).toLowerCase()}` as `0x${string}`;
+    const normalized = `0x${input.slice(2)}` as `0x${string}`;
 
     return ok(new Address(normalized));
   }
