@@ -15,12 +15,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogTrigger } from "@/shared/ui/dialog";
+import { EmailAuthForm } from "@/features/auth";
 import { toast } from "sonner";
 import { useState } from "react";
 
 export function ConnectButton() {
-  const { address, isConnected, connect, disconnect } = useWallet();
+  const { address, isConnected, disconnect } = useWallet();
   const [copied, setCopied] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   const handleCopyAddress = async () => {
     if (address) {
@@ -31,15 +34,23 @@ export function ConnectButton() {
     }
   };
 
+  const handleAuthSuccess = () => {
+    setAuthDialogOpen(false);
+  };
+
   if (!isConnected) {
     return (
-      <Button
-        onClick={connect}
-        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-      >
-        <Wallet className="mr-2 h-4 w-4" />
-        Connect Wallet
-      </Button>
+      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <Wallet className="mr-2 h-4 w-4" />
+            Connect Wallet
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md p-0 border-0">
+          <EmailAuthForm onClose={handleAuthSuccess} />
+        </DialogContent>
+      </Dialog>
     );
   }
 
@@ -65,7 +76,7 @@ export function ConnectButton() {
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-2 py-1.5">
           <div className="text-xs text-muted-foreground mb-1">
-            Connected Wallet
+            Embedded Wallet
           </div>
           <div className="font-mono text-sm bg-muted px-2 py-1 rounded text-center">
             {address?.slice(0, 8)}...{address?.slice(-8)}

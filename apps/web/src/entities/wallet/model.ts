@@ -19,7 +19,7 @@ function createNetworkLoadingPromise(loadingNetwork: boolean): Promise<void> {
 }
 
 export function useWallet() {
-  const { user, primaryWallet, setShowAuthFlow, handleLogOut, loadingNetwork } =
+  const { user, primaryWallet, handleLogOut, loadingNetwork } =
     useDynamicContext();
 
   if (loadingNetwork) {
@@ -29,7 +29,6 @@ export function useWallet() {
   return {
     address: primaryWallet?.address ?? null,
     isConnected: Boolean(user && primaryWallet),
-    connect: () => setShowAuthFlow(true),
     disconnect: () => handleLogOut(),
   };
 }
