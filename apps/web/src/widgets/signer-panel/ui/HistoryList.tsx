@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Separator } from "@/shared/ui/separator";
@@ -21,7 +22,7 @@ interface HistoryListProps {
   isLoading: boolean;
 }
 
-export function HistoryList({
+export const HistoryList = memo(function HistoryList({
   items,
   onClear,
   onRemove,
@@ -131,4 +132,4 @@ export function HistoryList({
       </CardContent>
     </Card>
   );
-}
+});

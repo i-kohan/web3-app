@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { Textarea } from "@/shared/ui/textarea";
 import { Button } from "@/shared/ui/button";
 import {
@@ -17,15 +17,22 @@ type Props = {
   logged: boolean;
 };
 
-export function SignForm({ onSubmit, disabled, logged }: Props) {
+export const SignForm = memo(function SignForm({
+  onSubmit,
+  disabled,
+  logged,
+}: Props) {
   const [message, setMessage] = useState("");
 
   const canSubmit = message.trim().length > 0 && !disabled;
 
-  const handleSubmit = (message: string) => {
-    setMessage("");
-    onSubmit(message);
-  };
+  const handleSubmit = useCallback(
+    (message: string) => {
+      setMessage("");
+      onSubmit(message);
+    },
+    [onSubmit]
+  );
 
   if (!logged) {
     return (
@@ -69,4 +76,4 @@ export function SignForm({ onSubmit, disabled, logged }: Props) {
       </CardContent>
     </Card>
   );
-}
+});
